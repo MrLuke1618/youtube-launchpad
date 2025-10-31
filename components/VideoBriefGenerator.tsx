@@ -47,6 +47,8 @@ interface BriefWorkflowState {
     socialPosts: SocialPosts;
     uploadChecklist: any[];
     promoteChecklist: any[];
+    isGeneratingDescription?: boolean;
+    isGeneratingPosts?: boolean;
 }
 
 const createNewBriefState = (seedData: any): BriefWorkflowState => ({
@@ -58,6 +60,8 @@ const createNewBriefState = (seedData: any): BriefWorkflowState => ({
     socialPosts: { twitter: '', linkedin: '', instagram: '', tiktok: '' },
     uploadChecklist: initialChecklist.map(item => ({...item})),
     promoteChecklist: initialPromoteChecklist.map(item => ({...item})),
+    isGeneratingDescription: false,
+    isGeneratingPosts: false,
 });
 
 const MIN_TOPIC_LENGTH = 5;
@@ -323,25 +327,29 @@ const VideoBriefGenerator: React.FC<VideoBriefGeneratorProps> = ({ initialData, 
 
     const handleGenerateDescription = async () => {
         if (!currentBrief) return;
-        updateCurrentBriefState(prev => ({...prev, generationStatus: 'generating'}));
+        updateCurrentBriefState(prev => ({ ...prev, isGeneratingDescription: true }));
+        setError(null);
         try {
             const result = await generateVideoDescription(currentBrief);
-            updateCurrentBriefState(prev => ({...prev, videoDescription: result.description, generationStatus: 'done' }));
-        } catch (e) {
+            updateCurrentBriefState(prev => ({ ...prev, videoDescription: result.description, isGeneratingDescription: false }));
+        } catch (e: any) {
+            setError(e.message || 'Failed to generate video description.');
             console.error(e);
-             updateCurrentBriefState(prev => ({...prev, generationStatus: 'done' }));
+            updateCurrentBriefState(prev => ({ ...prev, isGeneratingDescription: false }));
         }
     };
     
     const handleGeneratePosts = async () => {
         if (!currentBrief) return;
-        updateCurrentBriefState(prev => ({...prev, generationStatus: 'generating'}));
+        updateCurrentBriefState(prev => ({ ...prev, isGeneratingPosts: true }));
+        setError(null);
         try {
             const result = await generateSocialMediaPosts(currentBrief);
-            updateCurrentBriefState(prev => ({...prev, socialPosts: result, generationStatus: 'done' }));
-        } catch (e) {
+            updateCurrentBriefState(prev => ({ ...prev, socialPosts: result, isGeneratingPosts: false }));
+        } catch (e: any) {
+            setError(e.message || 'Failed to generate social media posts.');
             console.error(e);
-            updateCurrentBriefState(prev => ({...prev, generationStatus: 'done' }));
+            updateCurrentBriefState(prev => ({ ...prev, isGeneratingPosts: false }));
         }
     };
 
@@ -594,11 +602,19 @@ const VideoBriefGenerator: React.FC<VideoBriefGeneratorProps> = ({ initialData, 
                         )}
                         {activeTab === 'upload' && (
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <EditableCard id="upload-description" title="Video Description">
+                                <EditableCard 
+                                    id="upload-description" 
+                                    title="Video Description"
+                                    actions={
+                                        <ActionButton onClick={() => handleCopy(currentBriefState.videoDescription, 'description')} title="Copy Description">
+                                            {copiedItem === 'description' ? <span className="text-xs text-green-400">Copied!</span> : <ClipboardIcon className="w-5 h-5"/>}
+                                        </ActionButton>
+                                    }
+                                >
                                     <div className="space-y-4">
                                         <textarea value={currentBriefState.videoDescription} onChange={e => updateCurrentBriefState(p => ({...p, videoDescription: e.target.value}))} rows={15} className="w-full bg-dark-bg border border-dark-border rounded-md px-3 py-2 text-sm text-dark-text-secondary focus:ring-brand-purple focus:border-brand-purple" placeholder="Your video description goes here..."/>
-                                        <button onClick={handleGenerateDescription} disabled={isLoading} className="w-full bg-brand-purple/20 text-brand-purple-light font-semibold py-2 px-4 rounded-lg hover:bg-brand-purple/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                                            <SparklesIcon className="w-4 h-4"/> {isLoading ? 'Generating...' : 'Generate with AI'}
+                                        <button onClick={handleGenerateDescription} disabled={currentBriefState?.isGeneratingDescription} className="w-full bg-brand-purple/20 text-brand-purple-light font-semibold py-2 px-4 rounded-lg hover:bg-brand-purple/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                            <SparklesIcon className="w-4 h-4"/> {currentBriefState?.isGeneratingDescription ? 'Generating...' : 'Generate with AI'}
                                         </button>
                                     </div>
                                 </EditableCard>
@@ -621,24 +637,44 @@ const VideoBriefGenerator: React.FC<VideoBriefGeneratorProps> = ({ initialData, 
                                         <div className="space-y-4">
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
-                                                    <h4 className="font-semibold text-white mb-2">Twitter / X</h4>
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <h4 className="font-semibold text-white">Twitter / X</h4>
+                                                        <ActionButton onClick={() => handleCopy(currentBriefState.socialPosts.twitter, 'social-twitter')} title="Copy Twitter Post">
+                                                            {copiedItem === 'social-twitter' ? <span className="text-xs text-green-400">Copied!</span> : <ClipboardIcon className="w-5 h-5"/>}
+                                                        </ActionButton>
+                                                    </div>
                                                     <textarea value={currentBriefState.socialPosts.twitter} onChange={e => updateCurrentBriefState(p => ({ ...p, socialPosts: { ...p.socialPosts, twitter: e.target.value }}))} rows={5} className="w-full bg-dark-bg border border-dark-border rounded-md p-2 text-sm" />
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-semibold text-white mb-2">LinkedIn</h4>
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <h4 className="font-semibold text-white">LinkedIn</h4>
+                                                         <ActionButton onClick={() => handleCopy(currentBriefState.socialPosts.linkedin, 'social-linkedin')} title="Copy LinkedIn Post">
+                                                            {copiedItem === 'social-linkedin' ? <span className="text-xs text-green-400">Copied!</span> : <ClipboardIcon className="w-5 h-5"/>}
+                                                        </ActionButton>
+                                                    </div>
                                                     <textarea value={currentBriefState.socialPosts.linkedin} onChange={e => updateCurrentBriefState(p => ({ ...p, socialPosts: { ...p.socialPosts, linkedin: e.target.value }}))} rows={5} className="w-full bg-dark-bg border border-dark-border rounded-md p-2 text-sm" />
                                                 </div>
                                                  <div>
-                                                    <h4 className="font-semibold text-white mb-2">Instagram Post</h4>
+                                                     <div className="flex justify-between items-center mb-2">
+                                                        <h4 className="font-semibold text-white">Instagram Post</h4>
+                                                        <ActionButton onClick={() => handleCopy(currentBriefState.socialPosts.instagram, 'social-instagram')} title="Copy Instagram Post">
+                                                            {copiedItem === 'social-instagram' ? <span className="text-xs text-green-400">Copied!</span> : <ClipboardIcon className="w-5 h-5"/>}
+                                                        </ActionButton>
+                                                    </div>
                                                     <textarea value={currentBriefState.socialPosts.instagram} onChange={e => updateCurrentBriefState(p => ({ ...p, socialPosts: { ...p.socialPosts, instagram: e.target.value }}))} rows={5} className="w-full bg-dark-bg border border-dark-border rounded-md p-2 text-sm" />
                                                 </div>
                                                 <div>
-                                                    <h4 className="font-semibold text-white mb-2">TikTok Video Idea</h4>
+                                                     <div className="flex justify-between items-center mb-2">
+                                                        <h4 className="font-semibold text-white">TikTok Video Idea</h4>
+                                                        <ActionButton onClick={() => handleCopy(currentBriefState.socialPosts.tiktok, 'social-tiktok')} title="Copy TikTok Idea">
+                                                            {copiedItem === 'social-tiktok' ? <span className="text-xs text-green-400">Copied!</span> : <ClipboardIcon className="w-5 h-5"/>}
+                                                        </ActionButton>
+                                                    </div>
                                                     <textarea value={currentBriefState.socialPosts.tiktok} onChange={e => updateCurrentBriefState(p => ({ ...p, socialPosts: { ...p.socialPosts, tiktok: e.target.value }}))} rows={5} className="w-full bg-dark-bg border border-dark-border rounded-md p-2 text-sm" />
                                                 </div>
                                             </div>
-                                            <button onClick={handleGeneratePosts} disabled={isLoading} className="w-full bg-brand-purple/20 text-brand-purple-light font-semibold py-2 px-4 rounded-lg hover:bg-brand-purple/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                                                <SparklesIcon className="w-4 h-4"/> {isLoading ? 'Generating...' : 'Generate Posts with AI'}
+                                            <button onClick={handleGeneratePosts} disabled={currentBriefState?.isGeneratingPosts} className="w-full bg-brand-purple/20 text-brand-purple-light font-semibold py-2 px-4 rounded-lg hover:bg-brand-purple/30 transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                                <SparklesIcon className="w-4 h-4"/> {currentBriefState?.isGeneratingPosts ? 'Generating...' : 'Generate Posts with AI'}
                                             </button>
                                         </div>
                                     </EditableCard>

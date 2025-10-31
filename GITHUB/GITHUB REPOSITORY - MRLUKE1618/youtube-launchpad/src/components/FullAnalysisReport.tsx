@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
     OnboardingData, ShopifyApp, RegulationSummary, PlatformStructureInfo, MarketAnalysisResult, CompetitorData,
     AudiencePersona, ContentFunnelPlan, TopicExplorationResult, WebSearchResult, ContentSeriesPlan, VideoBrief,
-    RetentionAnalysis, ThumbnailAnalysisResult, View, FunnelVideoIdea, RetentionIssue
+    RetentionAnalysis, ThumbnailAnalysisResult, View, FunnelVideoIdea
 } from '../types';
 import DownloadIcon from './icons/DownloadIcon';
 import DocumentTextIcon from './icons/DocumentTextIcon';
@@ -40,7 +40,7 @@ interface FullReportData {
     research: { query: string, result: WebSearchResult } | null;
     seriesPlanner: { topic: string, plan: ContentSeriesPlan } | null;
     videoBrief: { briefStates: { brief: VideoBrief, seedData: { topic: string, title: string }}[] } | null;
-    scriptAnalyzer: { script: string, analysis: RetentionAnalysis[], analysisHistory?: RetentionAnalysis[] } | null;
+    scriptAnalyzer: { script: string, analysis: RetentionAnalysis[] } | null;
     thumbnailTester: { topic: string, titleA: string, titleB: string, imageA: any, imageB: any, analysis: ThumbnailAnalysisResult, promptA?: string | null, promptB?: string | null } | null;
 }
 
@@ -92,42 +92,6 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 
     return <>{elements}</>;
 };
-
-const renderHighlightedScript = (script: string, analysisHistory: RetentionAnalysis[] | undefined) => {
-    if (!analysisHistory || analysisHistory.length < 2) {
-        return <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-dark-text-secondary">{script}</pre>;
-    }
-
-    // Use the second-to-last analysis to find what was suggested
-    const lastCompletedAnalysis = analysisHistory[analysisHistory.length - 2];
-    if (!lastCompletedAnalysis || !lastCompletedAnalysis.issues) {
-        return <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-dark-text-secondary">{script}</pre>;
-    }
-    
-    const suggestions = lastCompletedAnalysis.issues.map(i => i.suggestion);
-    const uniqueSuggestions = [...new Set(suggestions.filter(s => s && s.trim() !== ''))];
-
-    if (uniqueSuggestions.length === 0) {
-        return <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-dark-text-secondary">{script}</pre>;
-    }
-
-    const escapeRegex = (str: string) => str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-    const regex = new RegExp(`(${uniqueSuggestions.map(escapeRegex).join('|')})`, 'g');
-    const parts = script.split(regex);
-
-    return (
-        <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-dark-text-secondary">
-            {parts.map((part, index) =>
-                uniqueSuggestions.includes(part) ? (
-                    <span key={index} className="bg-green-900/30 text-green-300 rounded px-1">{part}</span>
-                ) : (
-                    <span key={index}>{part}</span>
-                )
-            )}
-        </pre>
-    );
-};
-
 
 export const FullAnalysisReport: React.FC<FullAnalysisReportProps> = ({ onNavigate }) => {
     const [reportData, setReportData] = useState<FullReportData | null>(null);
@@ -579,55 +543,4 @@ export const FullAnalysisReport: React.FC<FullAnalysisReportProps> = ({ onNaviga
                                     {reportData.videoBrief.briefStates.map((state, i) => state.brief && (
                                         <ReportSubSection key={i} title={state.seedData.title || state.seedData.topic}>
                                             <DetailCard title="Title"><p>{state.brief.titleOptions[0]}</p></DetailCard>
-                                            <DetailCard title="Hook"><p className="whitespace-pre-wrap font-mono text-xs">{state.brief.hook}</p></DetailCard>
-                                            <DetailCard title="SEO Keywords"><p className="text-xs">{(state.brief.seoChecklist.keywords || []).join(', ')}</p></DetailCard>
-                                        </ReportSubSection>
-                                    ))}
-                                </ReportPreviewSection>
-                            )}
-
-                            {reportData?.scriptAnalyzer?.analysis?.[0] && (
-                                <ReportPreviewSection title="Script Polishing Studio">
-                                    {reportData.scriptAnalyzer.analysis.map((analysis, i) => (
-                                         <div key={i} className="p-4 bg-dark-card rounded-lg border border-dark-border/50 mb-4">
-                                            <h3 className="text-lg font-semibold">{analysis.title}</h3>
-                                            <p className="text-2xl font-bold text-brand-purple-light">{analysis.overallScore} / 100</p>
-                                            <p className="text-xs text-dark-text-secondary italic">{analysis.scoreContext}</p>
-                                            <p className="text-sm mt-2">{analysis.overallFeedback}</p>
-                                        </div>
-                                    ))}
-                                    {reportData.scriptAnalyzer.script && reportData.scriptAnalyzer.analysisHistory && (
-                                        <ReportSubSection title="Updated Script with Suggestions">
-                                            {renderHighlightedScript(reportData.scriptAnalyzer.script, reportData.scriptAnalyzer.analysisHistory)}
-                                        </ReportSubSection>
-                                    )}
-                                </ReportPreviewSection>
-                            )}
-
-                            {reportData?.thumbnailTester?.analysis && (
-                                <ReportPreviewSection title={`A/B Test Studio: ${reportData.thumbnailTester.topic}`}>
-                                    <div className="text-center p-4 bg-dark-card rounded-lg border border-brand-purple">
-                                        <p className="text-lg">Predicted Winner: <strong className="text-2xl">{reportData.thumbnailTester.analysis.predictedWinner === 'Tie' ? "It's a Tie!" : `Combination ${reportData.thumbnailTester.analysis.predictedWinner}`}</strong></p>
-                                        <p className="text-sm text-dark-text-secondary mt-1">{reportData.thumbnailTester.analysis.winnerReasoning}</p>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                                        <div className="space-y-2">
-                                            <h4 className="font-semibold text-lg">Combination A</h4>
-                                            {reportData.thumbnailTester.imageA && <img src={`data:${reportData.thumbnailTester.imageA.mimeType};base64,${reportData.thumbnailTester.imageA.data}`} alt="Thumbnail A" className="rounded-lg aspect-video object-cover"/>}
-                                            <p className="text-sm bg-dark-card/50 p-2 rounded"><strong>Title:</strong> {reportData.thumbnailTester.titleA}</p>
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h4 className="font-semibold text-lg">Combination B</h4>
-                                            {reportData.thumbnailTester.imageB && <img src={`data:${reportData.thumbnailTester.imageB.mimeType};base64,${reportData.thumbnailTester.imageB.data}`} alt="Thumbnail B" className="rounded-lg aspect-video object-cover"/>}
-                                            <p className="text-sm bg-dark-card/50 p-2 rounded"><strong>Title:</strong> {reportData.thumbnailTester.titleB}</p>
-                                        </div>
-                                    </div>
-                                </ReportPreviewSection>
-                            )}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
+                                            

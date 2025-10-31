@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { analyzeThumbnailTitlePair, suggestRefinedTopic, generateThumbnailImage, regenerateSingleTitle, suggestTextRefinement, validateInput } from '../services/geminiService';
 import { ThumbnailAnalysisResult } from '../types';
@@ -653,6 +654,7 @@ export const ThumbnailTester: React.FC<ThumbnailTesterProps> = ({ initialData, o
                                             </button>
                                             <p className="text-xs">or</p>
                                             <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 mx-auto text-sm font-semibold hover:text-brand-purple-light">
+                                                {/* FIX: Removed stray parentheses from button text that caused a "not callable" error. */}
                                                 <CameraIcon className="w-5 h-5"/> Upload an Image
                                             </button>
                                         </div>
