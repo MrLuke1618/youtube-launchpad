@@ -256,8 +256,7 @@ const ContentFunnelMapper: React.FC<ContentFunnelMapperProps> = ({ initialData }
 
     const isGenerateDisabled = isLoading || !topic.trim() || !!validationError;
 
-// FIX: Added missing return statement with JSX to complete the component.
-return (
+    return (
         <div className="space-y-8 animate-fade-in">
              <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-4">
                 <div>
@@ -364,15 +363,15 @@ return (
                                                         <div className="relative">
                                                             <input type="text" value={idea.title} onChange={e => handlePlanChange(stage, index, 'title', e.target.value)} className="font-semibold bg-transparent w-full focus:outline-none pr-28" />
                                                             <div className="absolute top-1/2 right-1 -translate-y-1/2 flex items-center gap-2">
-                                                                {loadingSuggestions[`${stage}-${index}-title`] && <div className="bg-dark-card border border-dark-border rounded-md px-2 py-1 text-xs text-dark-text-secondary animate-pulse">Thinking...</div>}
-                                                                <button onClick={() => handleSuggest(`${stage}-${index}-title`, 'Video Title', idea.title, `For the ${stage} stage of a content funnel.`)} disabled={loadingSuggestions[`${stage}-${index}-title`]} title="Suggest title" className="text-dark-text-secondary hover:text-brand-purple-light disabled:opacity-50"><SparklesIcon className="w-5 h-5"/></button>
+                                                                {loadingSuggestions[`${String(stage)}-${index}-title`] && <div className="bg-dark-card border border-dark-border rounded-md px-2 py-1 text-xs text-dark-text-secondary animate-pulse">Thinking...</div>}
+                                                                <button onClick={() => handleSuggest(`${String(stage)}-${index}-title`, 'Video Title', idea.title, `For the ${String(stage)} stage of a content funnel.`)} disabled={loadingSuggestions[`${String(stage)}-${index}-title`]} title="Suggest title" className="text-dark-text-secondary hover:text-brand-purple-light disabled:opacity-50"><SparklesIcon className="w-5 h-5"/></button>
                                                             </div>
                                                         </div>
                                                          <div className="relative">
                                                             <textarea value={idea.description} onChange={e => handlePlanChange(stage, index, 'description', e.target.value)} className="text-xs text-dark-text-secondary w-full bg-transparent mt-1 focus:outline-none pr-28" rows={2}/>
                                                             <div className="absolute top-0 right-1 flex items-center gap-2">
-                                                                {loadingSuggestions[`${stage}-${index}-description`] && <div className="bg-dark-card border border-dark-border rounded-md px-2 py-1 text-xs text-dark-text-secondary animate-pulse">Thinking...</div>}
-                                                                <button onClick={() => handleSuggest(`${stage}-${index}-description`, 'Video Description', idea.description, `For a video titled '${idea.title}'.`)} disabled={loadingSuggestions[`${stage}-${index}-description`]} title="Suggest description" className="text-dark-text-secondary hover:text-brand-purple-light disabled:opacity-50"><SparklesIcon className="w-5 h-5"/></button>
+                                                                {loadingSuggestions[`${String(stage)}-${index}-description`] && <div className="bg-dark-card border border-dark-border rounded-md px-2 py-1 text-xs text-dark-text-secondary animate-pulse">Thinking...</div>}
+                                                                <button onClick={() => handleSuggest(`${String(stage)}-${index}-description`, 'Video Description', idea.description, `For a video titled '${idea.title}'.`)} disabled={loadingSuggestions[`${String(stage)}-${index}-description`]} title="Suggest description" className="text-dark-text-secondary hover:text-brand-purple-light disabled:opacity-50"><SparklesIcon className="w-5 h-5"/></button>
                                                             </div>
                                                         </div>
                                                         <div className="relative mt-2">
@@ -395,6 +394,4 @@ return (
         </div>
     );
 };
-
-// FIX: Added missing default export.
 export default ContentFunnelMapper;
