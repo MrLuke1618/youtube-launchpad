@@ -3,10 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CreatorBridge</title>
-  </head>
+    <title>YT Launchpad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'brand-purple': '#8A42E2',
+              'brand-purple-light': '#A467F5',
+              'dark-bg': '#131221',
+              'dark-card': '#1D1B2E',
+              'dark-border': '#312F45',
+              'dark-text': '#E5E7EB',
+              'dark-text-secondary': '#9CA3AF',
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      html {
+        font-size: 16px; /* Default for mobile and tablets */
+      }
+      @media (min-width: 1024px) { /* Tailwind's lg breakpoint */
+        html {
+          font-size: 18px; /* Larger base size for desktop for better readability */
+        }
+      }
+    </style>
+    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <script src="https://unpkg.com/mammoth@1.7.1/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
+    "jspdf": "https://aistudiocdn.com/jspdf@^2.5.1",
+    "jspdf-autotable": "https://aistudiocdn.com/jspdf-autotable@^5.0.2"
+  }
+}
+</script>
+</head>
   <body class="bg-dark-bg" style="background-image: radial-gradient(rgba(138, 66, 226, 0.05) 1px, transparent 1px); background-size: 20px 20px;">
     <div id="root"></div>
-    <script type="module" src="/src/index.tsx"></script>
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./src/index.tsx"></script>
   </body>
 </html>
