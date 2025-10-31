@@ -33,11 +33,12 @@
         }
       }
     </style>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- REMOVED React 18 UMD scripts to resolve version conflict with importmap -->
     <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
     <script src="https://unpkg.com/mammoth@1.7.1/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- ADDED Babel for in-browser TSX/JSX transpilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="importmap">
 {
   "imports": {
@@ -51,9 +52,12 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-dark-bg" style="background-image: radial-gradient(rgba(138, 66, 226, 0.05) 1px, transparent 1px); background-size: 20px 20px;">
     <div id="root"></div>
-    <script type="module" src="./index.tsx"></script>
-  </body>
+    <!-- CHANGED script type to enable Babel transpilation for TSX/JSX and modules -->
+    <script type="text/babel" data-type="module" data-presets="react,typescript" src="./index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>
