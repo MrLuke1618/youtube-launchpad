@@ -32,11 +32,10 @@
         }
       }
     </style>
-    <!-- REMOVED React 18 UMD scripts to resolve version conflict with importmap -->
-    <script src="https://unpkg.com/recharts/umd/Recharts.min.js"></script>
+    <!-- UMD scripts for libraries that provide globals (mammoth, html2canvas) -->
     <script src="https://unpkg.com/mammoth@1.7.1/mammoth.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <!-- ADDED Babel for in-browser TSX/JSX transpilation -->
+    <!-- Babel for in-browser TSX/JSX transpilation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="importmap">
 {
